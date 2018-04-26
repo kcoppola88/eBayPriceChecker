@@ -1,0 +1,48 @@
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelector('#searchbtn').addEventListener('click', search_Price);
+});
+
+function search_Price() {
+    var ebayItemID = document.querySelector('#itemidinput').value;
+    try {
+        var regex = /^[0-9]{1,12}$/;
+        if (regex.test(ebayItemID)) {
+            var xhr = new XMLHttpRequest();
+            xhr.onload = function () { };
+            xhr.onerror = function () { };
+
+            xhr.open("GET", "https://www.ebay.com/sch/i.html?_nkw=" + ebayItemID + "&_in_kw=1&_ex_kw=&_sacat=0&LH_Complete=1&_udlo=&_udhi=&_samilow=&_samihi=&_sadis=15&_stpos=34231&_sargn=-1%26saslc%3D1&_salic=1&_sop=12&_dmd=1&_ipg=50", true);
+
+            xhr.onreadystatechange = function () {
+                if (this.readyState == 4 && this.status == 200) {
+                    var parser = new DOMParser();
+                    var getPrice = "";
+                    var returnedPage = parser.parseFromString(xhr.responseText, "text/html");
+                    var priceSpan = returnedPage.getElementsByClassName('lvprice prc');
+                    if (priceSpan.length == 0) {
+                        var priceToSet = document.querySelector('#pricelabel');
+                        priceToSet.innerText = "Sorry, cannot find price for this item. Do a manual search to confirm price paid.";
+                    }
+                    else {
+                        console.log(priceSpan);
+                        for (var i = 0; i < 1; i++) {
+                            getPrice = priceSpan[i].innerText;
+                        }
+                        var pricePaid = getPrice;
+                        var priceToSet = document.querySelector('#pricelabel');
+                        priceToSet.innerText = "Price paid for item: " + pricePaid;
+                    }
+                }
+            }
+            xhr.send();
+        }
+        else {
+            var priceToSet = document.querySelector('#pricelabel');
+            priceToSet.innerText = "Not a valid eBay Item ID.";
+        }
+    }
+    catch (e) {
+        console.log(e);
+        alert('Request error.');
+    }
+}
